@@ -42,35 +42,54 @@ def send_to_termbin(text: str) -> str:
 def extract_text_from_image(image_path: str) -> str:
     """Extract text from image using OCR with preprocessing for better quality."""
     try:
+        from PIL import ImageEnhance, ImageFilter, ImageOps
+        
         image = Image.open(image_path)
         
+        # Convert to RGB first if needed (handles RGBA, etc.)
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
         # Preprocessing for better OCR quality
-        # 1. Convert to grayscale
-        image = image.convert('L')
-        
-        # 2. Increase contrast
-        from PIL import ImageEnhance, ImageFilter
-        enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2.0)
-        
-        # 3. Sharpen the image
-        image = image.filter(ImageFilter.SHARPEN)
-        
-        # 4. Scale up small images for better recognition
+        # 1. Scale up small images first
         width, height = image.size
-        if width < 1000:
-            scale = 1000 / width
+        if width < 1500:
+            scale = 1500 / width
             image = image.resize((int(width * scale), int(height * scale)), Image.LANCZOS)
         
-        # OCR with multiple languages and optimized config
-        # --psm 3: Fully automatic page segmentation
-        # --oem 3: Default OCR Engine Mode
-        custom_config = r'--oem 3 --psm 3'
+        # 2. Convert to grayscale
+        gray = image.convert('L')
+        
+        # 3. Auto-contrast to normalize the image
+        gray = ImageOps.autocontrast(gray)
+        
+        # 4. Increase sharpness
+        enhancer = ImageEnhance.Sharpness(gray)
+        gray = enhancer.enhance(2.0)
+        
+        # 5. Apply threshold to create binary image (black text on white background)
+        threshold = 140
+        binary = gray.point(lambda x: 255 if x > threshold else 0, mode='1')
+        binary = binary.convert('L')  # Convert back to grayscale for tesseract
+        
+        # OCR with multiple languages
+        # --psm 6: Assume a single uniform block of text
+        custom_config = r'--oem 3 --psm 6'
         text = pytesseract.image_to_string(
-            image, 
+            binary, 
             lang='eng+ukr+pol+rus+deu',
             config=custom_config
         )
+        
+        # If result is poor, try with original grayscale (different PSM)
+        if len(text.strip()) < 20:
+            custom_config = r'--oem 3 --psm 3'
+            text = pytesseract.image_to_string(
+                gray, 
+                lang='eng+ukr+pol+rus+deu',
+                config=custom_config
+            )
+        
         return text.strip() if text.strip() else "No text found in image."
     except Exception as e:
         return f"OCR Error: {e}"
