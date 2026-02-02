@@ -1,42 +1,47 @@
-# Termbin Telegram Bot 🤖
+# Termbin + AI Telegram Bot
 
-A simple Telegram bot that saves text messages to [termbin.com](https://termbin.com) and returns the link.
+A Telegram bot that combines text sharing via [termbin.com](https://termbin.com) with AI chat capabilities.
 
-## How it works
+## Features
 
-1. You send a text message to the bot
-2. The bot sends it to termbin.com (like `echo "text" | nc termbin.com 9999`)
-3. The bot returns the link to your saved text
+- **Termbin Mode** (default): Send any text and get a shareable termbin.com link
+- **AI Mode**: Chat with Llama 3.1 8B for coding help and Q&A
 
-## Installation
+## Commands
 
-1. Clone the repository:
+| Command | Description |
+|---------|-------------|
+| `/start` | Show help message |
+| `/ai` | Enter AI mode |
+| `/quit` | Exit AI mode, return to Termbin |
+
+## Setup
+
+### 1. Get API Keys
+
+- **Telegram Bot Token**: Get from [@BotFather](https://t.me/BotFather)
+- **OpenRouter API Key**: Get from [openrouter.ai](https://openrouter.ai/keys)
+
+### 2. Install Dependencies
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/termbin-bot.git
-cd termbin-bot
+pip install python-telegram-bot openai
 ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Get a bot token:
-   - Message [@BotFather](https://t.me/BotFather) on Telegram
-   - Send `/newbot` command
-   - Follow instructions and copy the token
-
-4. Set the environment variable:
-```bash
-export TERMBIN_BOT_TOKEN="your_token_here"
-```
-
-## Usage
+### 3. Run the Bot
 
 ```bash
+export TERMBIN_BOT_TOKEN="your_telegram_bot_token"
+export OPENROUTER_API_KEY="your_openrouter_api_key"
 python3 bot.py
 ```
 
-### Commands
-- `/start` - Welcome message
-- Send any text - Get a termbin link
+## How It Works
+
+1. By default, any text you send is uploaded to termbin.com
+2. Use `/ai` to switch to AI mode for chatting with Llama 3.1 8B
+3. Use `/quit` to return to Termbin mode
+
+## License
+
+MIT
