@@ -40,11 +40,37 @@ def send_to_termbin(text: str) -> str:
 
 
 def extract_text_from_image(image_path: str) -> str:
-    """Extract text from image using OCR with multi-language support."""
+    """Extract text from image using OCR with preprocessing for better quality."""
     try:
         image = Image.open(image_path)
-        # Support multiple languages: English, Ukrainian, Polish, Russian, German
-        text = pytesseract.image_to_string(image, lang='eng+ukr+pol+rus+deu')
+        
+        # Preprocessing for better OCR quality
+        # 1. Convert to grayscale
+        image = image.convert('L')
+        
+        # 2. Increase contrast
+        from PIL import ImageEnhance, ImageFilter
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(2.0)
+        
+        # 3. Sharpen the image
+        image = image.filter(ImageFilter.SHARPEN)
+        
+        # 4. Scale up small images for better recognition
+        width, height = image.size
+        if width < 1000:
+            scale = 1000 / width
+            image = image.resize((int(width * scale), int(height * scale)), Image.LANCZOS)
+        
+        # OCR with multiple languages and optimized config
+        # --psm 3: Fully automatic page segmentation
+        # --oem 3: Default OCR Engine Mode
+        custom_config = r'--oem 3 --psm 3'
+        text = pytesseract.image_to_string(
+            image, 
+            lang='eng+ukr+pol+rus+deu',
+            config=custom_config
+        )
         return text.strip() if text.strip() else "No text found in image."
     except Exception as e:
         return f"OCR Error: {e}"
