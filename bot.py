@@ -40,10 +40,11 @@ def send_to_termbin(text: str) -> str:
 
 
 def extract_text_from_image(image_path: str) -> str:
-    """Extract text from image using OCR."""
+    """Extract text from image using OCR with multi-language support."""
     try:
         image = Image.open(image_path)
-        text = pytesseract.image_to_string(image)
+        # Support multiple languages: English, Ukrainian, Polish, Russian, German
+        text = pytesseract.image_to_string(image, lang='eng+ukr+pol+rus+deu')
         return text.strip() if text.strip() else "No text found in image."
     except Exception as e:
         return f"OCR Error: {e}"
