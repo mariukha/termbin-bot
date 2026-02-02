@@ -1,0 +1,16 @@
+[Unit]
+Description=Termbin Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/termbin-bot
+Environment="TERMBIN_BOT_TOKEN=your_telegram_token"
+Environment="OPENROUTER_API_KEY=your_openrouter_key"
+ExecStart=/home/YOUR_USERNAME/termbin-bot/venv/bin/python3 bot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
