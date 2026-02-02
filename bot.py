@@ -49,9 +49,20 @@ def transcribe_audio(audio_path: str) -> str:
 
 
 def text_to_speech(text: str, output_path: str) -> bool:
-    """Convert text to speech and save as audio file."""
+    """Convert text to speech with automatic language detection."""
     try:
-        tts = gTTS(text=text, lang='en')  # Auto-detect doesn't work well, default to English
+        from langdetect import detect
+        
+        # Detect language
+        try:
+            lang = detect(text)
+            # Map some language codes for gTTS compatibility
+            lang_map = {'uk': 'uk', 'pl': 'pl', 'ru': 'ru', 'en': 'en', 'de': 'de', 'fr': 'fr', 'es': 'es'}
+            lang = lang_map.get(lang, 'en')  # Fallback to English
+        except:
+            lang = 'en'
+        
+        tts = gTTS(text=text, lang=lang)
         tts.save(output_path)
         return True
     except Exception as e:
